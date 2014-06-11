@@ -1,0 +1,5 @@
+Cov:  covariance function
+SE:   squared exponential
+iso:  isotropic
+Diff: differentiable w.r.t input coordinates or take derivative observations
+Slow: non-vectorized or element-wised version
