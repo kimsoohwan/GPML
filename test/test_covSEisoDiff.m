@@ -4,6 +4,7 @@ close all
 
 addpath('../util/');
 addpath('../cov/');
+addpath('../cov/covSEisoDiff');
 
 % hyperparameters
 hyp = log([1, 1]);
