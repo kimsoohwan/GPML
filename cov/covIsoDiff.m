@@ -1,4 +1,4 @@
-function k = covIsoDiff(hyp, x, z, i, pdx, pdz, f_handles)
+function k = covisoDiff(hyp, x, z, i, pdx, pdz, f_handles)
 
 %% function name convention
 % cov:  covariance function

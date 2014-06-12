@@ -89,7 +89,7 @@ f_handles.d2s_dell_dzj      = @(hyp_, x_, z_, i_, pdx_, pdz_) (-2/exp(hyp_(1)))*
 f_handles.d3s_dell_dxi_dzj  = @(hyp_, x_, z_, i_, pdx_, pdz_) (-2/exp(hyp_(1)))*f_handles.d2s_dxi_dzj(hyp_, x_, z_, i_, pdx_, pdz_);
 
 % call
-k = covIsoDiff(hyp, x, z, i, pdx, pdz, f_handles);
+k = covisoDiff(hyp, x, z, i, pdx, pdz, f_handles);
 
 % subfunctions
 function value = s(hyp_, x_, z_)
