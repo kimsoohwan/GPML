@@ -1,16 +1,16 @@
-function k = covSEisoDiffSlow(hyp, x, z, i, pdx, pdz)
+function k = covSEisoDiffBase(hyp, x, z, i, pdx, pdz)
 
 %% function name convention
 % cov:  covariance function
 % SE:   squared exponential
 % iso:  isotropic
 % Diff: differentiable w.r.t input coordinates or take derivative observations
-% Slow: non-vectorized or element-wised version
+% Base: base function for covIsoDiff
 
 %% input/output arguments
 % hyp:  [1x2]   hyperparameters, hyp = [log(ell), log(sigma_f)]
-% x:    [dx1]   first function/derivative input vector
-% z:    [dx1]   second function/derivative input vector, default: [] meaning z = x
+% x:    [1xd]   first function/derivative input vector
+% z:    [1xd]   second function/derivative input vector, default: [] meaning z = x
 % i:            partial deriavtive coordiante w.r.t hyperparameters, default: 0
 % pdx:          partial derivative coordinate w.r.t the first input
 %               if dxi = 0 (default), x = function input vector, else x = derivative input
@@ -64,72 +64,37 @@ function k = covSEisoDiffSlow(hyp, x, z, i, pdx, pdz)
 %                                       = ell*(------*------*-----*------ + ------*(----------*------- + ------*------------ + ------*-----------) + ----*-----------------)
 %                                               ds^3   dell   dx_i  dx'_j    ds^2    dell dx_i  dx'_j     dx_i  dell dx'_j      dell   dx_i dx'_j     ds   dell dx_i dx'_j
    
-% default parameters
-if nargin < 2, K = '2'; return; end                  % report number of parameters
-if nargin < 3, z = [];  end                                  % make sure, z exists
-xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
-if nargin < 4, i = 0;   end
-if nargin < 5, pdx = 0; end
-if nargin < 5, pdz = 0; end
+% % default parameters
+% % if nargin < 2, K = '2'; return; end                  % report number of parameters
+% if nargin < 3, z = x;  end                                  % make sure, z exists
+% % xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
+% if nargin < 4, i = 0;   end
+% if nargin < 5, pdx = 0; end
+% if nargin < 6, pdz = 0; end
 
-% component function
-f_handles.k = @k;
-% no derivative w.r.t hyperparameters
-if i ~= 0
-    if pdx == 0
-        if pdz == 0
-            % k(x, z)
-            k = 
-        else
-            % k(x, dz/dz_j)
-        end
-    else
-        if pdz == 0
-            % k(dx/dx_i, z)
-        else
-            % k(dx/dx_j, dz/dz_j)
-        end
-    end
-    
-% derivative w.r.t hyperparameters
-else
-    if i == 1
-        if pdx == 0
-            if pdz == 0
-                % dk(x, z)/dlog(ell)
-            else
-                % dk(x, dz/dz_j)/dlog(ell)
-            end
-        else
-            if pdz == 0
-                % dk(dx/dx_i, z)/dlog(ell)
-            else
-                % dk(dx/dx_j, dz/dz_j)/dlog(ell)
-            end
-        end
-    else
-        if pdx == 0
-            if pdz == 0
-                % dk(x, z)/dlog(sigma_f)
-            else
-                % dk(x, dz/dz_j)/dlog(sigma_f)
-            end
-        else
-            if pdz == 0
-                % dk(dx/dx_i, z)/dlog(sigma_f)
-            else
-                % dk(dx/dx_j, dz/dz_j)/dlog(sigma_f)
-            end
-        end
-    end
+% component functions
+f_handles.k             = @(hyp_, x_, z_, i_, pdx_, pdz_) exp(2*hyp_(2))*exp(s(hyp_, x_, z_));
+
+f_handles.dk_ds         = f_handles.k;
+f_handles.d2k_ds2       = f_handles.k;
+f_handles.d3k_ds3       = f_handles.k;
+
+f_handles.ds_dxi        = @(hyp_, x_, z_, i_, pdx_, pdz_) -delta(x_, z_, pdx_)/exp(2*hyp_(1));
+f_handles.ds_dzj        = @(hyp_, x_, z_, i_, pdx_, pdz_)  delta(x_, z_, pdz_)/exp(2*hyp_(1));
+f_handles.d2s_dxi_dzj   = @(hyp_, x_, z_, i_, pdx_, pdz_)  (pdx_ == pdz_)/exp(2*hyp_(1));
+
+f_handles.ds_dell           = @(hyp_, x_, z_, i_, pdx_, pdz_) (-2/exp(hyp_(1)))*s(hyp_, x_, z_);
+f_handles.d2s_dell_dxi      = @(hyp_, x_, z_, i_, pdx_, pdz_) (-2/exp(hyp_(1)))*f_handles.ds_dxi(hyp_, x_, z_, i_, pdx_, pdz_);
+f_handles.d2s_dell_dzj      = @(hyp_, x_, z_, i_, pdx_, pdz_) (-2/exp(hyp_(1)))*f_handles.ds_dzj(hyp_, x_, z_, i_, pdx_, pdz_);
+f_handles.d3s_dell_dxi_dzj  = @(hyp_, x_, z_, i_, pdx_, pdz_) (-2/exp(hyp_(1)))*f_handles.d2s_dxi_dzj(hyp_, x_, z_, i_, pdx_, pdz_);
+
+% call
+k = covIsoDiff(hyp, x, z, i, pdx, pdz, f_handles);
+
+% subfunctions
+function value = s(hyp_, x_, z_)
+    ell = exp(hyp_(1));                             % ell
+    value = (-1/2) * sq_dist(x_'/ell, z_'/ell);     % s = (-1/2)*r^2/ell^2 
 end
 
-%% component functions
-function dk_ds()
 end
-
-	*					which requires four components, ds/dx_i, ds/dx'_j, d^2k/ds^2 and d^2s/dx_i dx'_j
-	*					as well as dk/ds which is already required in Isotropic.
-	*
-
-% Copyright (c) by Soohwan Kim, 2014-06-11.

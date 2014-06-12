@@ -1,0 +1,70 @@
+clc
+clear all
+close all
+
+addpath('../util/');
+addpath('../cov/');
+
+% hyperparameters
+hyp = log([1, 1]);
+
+% data
+d = 3;
+n  = 5;  x  = rand(n, d);
+nd = 4;  xd = rand(nd, d);
+ns = 3;  z  = rand(ns, d);
+
+%% Test: covSEisoDiffCwise vs. covSEiso
+testcase_name = '[covSEisoDiffBwise vs. covSEiso] ';
+
+% K(x, x)
+TEST_EQ(covSEisoDiffCwise(hyp, x), covSEiso(hyp, x), [testcase_name, 'K(x, x)']);
+
+% dK(x, x)/dtheta_i
+for i = 1:length(hyp)
+    TEST_EQ(covSEisoDiffCwise(hyp, x, [], i), covSEiso(hyp, x, [], i), [testcase_name, 'dK(x, x)/dtheta_', num2str(i)]);
+end
+
+% K(x, z)
+TEST_EQ(covSEisoDiffCwise(hyp, x, z), covSEiso(hyp, x, z), [testcase_name, 'covSEiso] K(x, z)']);
+
+
+%% Test: covSEisoDiffBwise vs. covSEiso
+% K(x, x)
+TEST_EQ(covSEisoDiffBwise(hyp, x), covSEiso(hyp, x), [testcase_name, 'K(x, x)']);
+
+% dK(x, x)/dtheta_i
+for i = 1:length(hyp)
+    TEST_EQ(covSEisoDiffBwise(hyp, x, [], i), covSEiso(hyp, x, [], i), [testcase_name, 'dK(x, x)/dtheta_', num2str(i)]);
+end
+
+% K(x, z)
+TEST_EQ(covSEisoDiffBwise(hyp, x, z), covSEiso(hyp, x, z), [testcase_name, 'K(x, z)']);
+
+
+%% Test: covSEisoDiffCwise vs. covSEisoDiffBwise
+% K(x, x)
+TEST_EQ(covSEisoDiffCwise(hyp, x), covSEisoDiffBwise(hyp, x), [testcase_name, 'K(x, x)']);
+
+% dK(x, x)/dtheta_i
+for i = 1:length(hyp)
+    TEST_EQ(covSEisoDiffCwise(hyp, x, [], i), covSEisoDiffBwise(hyp, x, [], i), [testcase_name, 'dK(x, x)/dtheta_', num2str(i)]);
+end
+
+% K(x, z)
+TEST_EQ(covSEisoDiffCwise(hyp, x, z), covSEisoDiffBwise(hyp, x, z), [testcase_name, 'K(x, z)']);
+
+
+%%
+% combinations
+for i = 0:length(hyp)
+    for pdx = 0:d
+        for pdz = 0:d
+            TEST_EQ(covSEisoDiffCwise(hyp, x, z, i, pdx, pdz), ...
+                    covSEisoDiffBwise(hyp, x, z, i, pdx, pdz), ...
+                    [testcase_name, 'i = ', num2str(i), ...
+                                                                                ', pdx = ', num2st(pdx), ', pdz = ', num2str(pdz)]);
+        end
+    end
+end
+
