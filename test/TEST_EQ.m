@@ -7,7 +7,7 @@ end
 
 % test equality
 if any(abs(A - B) >= eps)
-    fprintf(1, ['\t\tFailure: ', test_name, '\n']);
+    fprintf(2, ['\t\tFailure: ', test_name, '\n']);
 else
     fprintf(1, ['\t\tSuccess: ', test_name, '\n']);
 end

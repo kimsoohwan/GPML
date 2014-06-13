@@ -72,26 +72,37 @@ function k = covSEisoDiffBase(hyp, x, z, i, pdx, pdz)
 % if nargin < 5, pdx = 0; end
 % if nargin < 6, pdz = 0; end
 
-% component functions
+%% component functions
+
+% k = sigma_f^2 * exp(s)
 f_handles.k             = @(hyp_, x_, z_, i_, pdx_, pdz_) exp(2*hyp_(2))*exp(s(hyp_, x_, z_));
 
+% dk/ds = d2k/ds2 = d3k/ds3 = k
 f_handles.dk_ds         = f_handles.k;
 f_handles.d2k_ds2       = f_handles.k;
 f_handles.d3k_ds3       = f_handles.k;
 
+% ds/dxi =   -(xi - zi)/ell^2
+% ds/dzj =    (xj - zj)/ell^2
+% d2s/dxi dzj = d(i, j)/ell^2
 f_handles.ds_dxi        = @(hyp_, x_, z_, i_, pdx_, pdz_) -delta(x_, z_, pdx_)/exp(2*hyp_(1));
 f_handles.ds_dzj        = @(hyp_, x_, z_, i_, pdx_, pdz_)  delta(x_, z_, pdz_)/exp(2*hyp_(1));
-f_handles.d2s_dxi_dzj   = @(hyp_, x_, z_, i_, pdx_, pdz_)  (pdx_ == pdz_)/exp(2*hyp_(1));
+f_handles.d2s_dxi_dzj   = @(hyp_, x_, z_, i_, pdx_, pdz_)       (pdx_ == pdz_)/exp(2*hyp_(1));
 
+% ds/dell           = (-2/ell)*s
+% d2s/dell dxi      = (-2/ell)*ds/dxi
+% d2s/dell dzj      = (-2/ell)*ds/dzj
+% d3s/dell dxi dzj	= (-2/ell)*d2s/dxi dzj
 f_handles.ds_dell           = @(hyp_, x_, z_, i_, pdx_, pdz_) (-2/exp(hyp_(1)))*s(hyp_, x_, z_);
 f_handles.d2s_dell_dxi      = @(hyp_, x_, z_, i_, pdx_, pdz_) (-2/exp(hyp_(1)))*f_handles.ds_dxi(hyp_, x_, z_, i_, pdx_, pdz_);
 f_handles.d2s_dell_dzj      = @(hyp_, x_, z_, i_, pdx_, pdz_) (-2/exp(hyp_(1)))*f_handles.ds_dzj(hyp_, x_, z_, i_, pdx_, pdz_);
 f_handles.d3s_dell_dxi_dzj  = @(hyp_, x_, z_, i_, pdx_, pdz_) (-2/exp(hyp_(1)))*f_handles.d2s_dxi_dzj(hyp_, x_, z_, i_, pdx_, pdz_);
 
 % call
-k = covisoDiff(hyp, x, z, i, pdx, pdz, f_handles);
+k = covisoDiff(f_handles, hyp, x, z, i, pdx, pdz);
 
-% subfunctions
+%% sub component function
+% s = -r^2/(2*ell^2)
 function value = s(hyp_, x_, z_)
     ell = exp(hyp_(1));                             % ell
     value = (-1/2) * sq_dist(x_'/ell, z_'/ell);     % s = (-1/2)*r^2/ell^2 

@@ -82,13 +82,40 @@ test_name = '\t[TESE: covSEisoDiffBwise - symmetric]\n';
 fprintf(1, test_name);
 
 % K(x, x)
-TEST_EQ(covSEisoDiffBwise(hyp, x, [], 0, xd), ...
-        covSEisoDiffBwise(hyp, x, [], 0, xd)', ...
+K = covSEisoDiffBwise(hyp, x, [], 0, xd);
+TEST_EQ(K, ...
+        K', ...
         'K(x, x)');
 
 % dK(x, x)/dtheta_i    
-for i = 1:length(hyp)                     
-    TEST_EQ(covSEisoDiffBwise(hyp, x, [], i, xd), ...
-            covSEisoDiffBwise(hyp, x, [], i, xd)', ...
+for i = 1:length(hyp)
+    K = covSEisoDiffBwise(hyp, x, [], i, xd);
+    TEST_EQ(K, ...
+            K', ...
+            ['dK(x, x)/dtheta_', num2str(i)]);
+end
+
+%% Test: covSEisoDiffBwise - positive definite
+test_name = '\t[TESE: covSEisoDiffBwise - positive definite]\n';
+fprintf(1, test_name);
+
+% sigma_n
+sigma_n = 1;
+
+% K(x, x)
+K = covSEisoDiffBwise(hyp, x, [], 0, xd);
+K = K + sigma_n^2*eye(size(K));
+[R, p] = chol(K);
+TEST_EQ(p, ...
+        0', ...
+        'K(x, x)');
+
+% dK(x, x)/dtheta_i    
+for i = 1:length(hyp)
+    K = covSEisoDiffBwise(hyp, x, [], i, xd);
+    K = K + sigma_n^2*eye(size(K));
+    [R, p] = chol(K);
+    TEST_EQ(p, ...
+            0', ...
             ['dK(x, x)/dtheta_', num2str(i)]);
 end
