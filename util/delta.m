@@ -22,5 +22,4 @@ function C = delta(A, B, i)
 %      ani-b1i, ani-b2i, ... ani-bmi];
 %
 % Please refer to GPML/util/sq_dist.m
-
 C = bsxfun(@minus, A(:, i), B(:, i)');

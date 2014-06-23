@@ -1,28 +1,20 @@
-function K = covSEisoDiffBwise(hyp, x, z, i, xd)
+function K = covisoDiffBwise(f_handles, hyp, x, xd, z, i)
 
 %% function name convention
 % cov:  covariance function
-% SE:   squared exponential
 % iso:  isotropic
 % Diff: differentiable w.r.t input coordinates or take derivative observations
 % Bwise: block maxtrix-wised version
 
 %% input/output arguments
 % hyp:  [1x2]   hyperparameters, hyp = [log(ell), log(sigma_f)]
-% x:    [nxd]   first function/derivative input vector
-% z:    [nsxd]  second function/derivative input vector, default: [] meaning z = x
+% x:    [nxd]   first function input vectors
+% z:    [nsxd]  second function input vectors, default: [] meaning z = x
 % i:            partial deriavtive coordiante w.r.t hyperparameters, default: 0
-% pdx:          partial derivative coordinate w.r.t the first input
-%               if dxi = 0 (default), x = function input vector, else x = derivative input
-% pdz:          partial derivative coordinate w.r.t the second input
-%               if pdz = 0 (default), z = function input vector, else z = derivative input
-% K:    [nxns]  covariance
+% xd:   [ndxd]  first derivative input vectors
+% K:    [nnxns]  covariance, nn = n + nd*d
 
-% default parameters
-if nargin < 2, K = '2'; return; end                  % report number of parameters
-if nargin < 3, z = [];  end                                   % make sure, z exists
-if nargin < 4, i = 0;   end
-if nargin < 5, xd = []; end
+% some constants
 xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
 [n, d]  = size(x);
 ns      = size(z, 1);
@@ -31,7 +23,7 @@ nd      = size(xd, 1);
 % prediction
 if dg
     % Kss
-    K = zeros(n+nd, 1);
+    K = ones(n+nd, 1);
     
 % learning
 else
@@ -87,7 +79,7 @@ else
                 end
 
                 % calculation
-                K(start_row:end_row, start_col:end_col) = covSEisoDiffBase(hyp, xx, zz, i, pdx, pdz);
+                K(start_row:end_row, start_col:end_col) = covisoDiff(f_handles, hyp, xx, zz, i, pdx, pdz);
             end
         end
         
@@ -133,7 +125,7 @@ else
             end_col     = ns;
             
             % calculation
-            K(start_row:end_row, start_col:end_col) = covSEisoDiffBase(hyp, xx, zz, i, pdx, pdz);
+            K(start_row:end_row, start_col:end_col) = covisoDiff(f_handles, hyp, xx, zz, i, pdx, pdz);
         end
     end
 end

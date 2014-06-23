@@ -16,83 +16,99 @@ disp(testcase_name);
 test_name = '\t[TESE: covSEisoDiffCwise vs. covSEiso]\n';
 fprintf(1, test_name);
 
-% K(x, x)
-TEST_EQ(covSEisoDiffCwise(hyp, x), ...
+% K = K(x, x)
+TEST_EQ(covSEisoDiff(hyp, x, [], 0, [], false), ...
         covSEiso(hyp, x), ...
-        'K(x, x)');
+        'K = K(x, x)');
 
-% dK(x, x)/dtheta_i
+% K_i = dK(x, x)/dtheta_i
 for i = 1:length(hyp)
-    TEST_EQ(covSEisoDiffCwise(hyp, x, [], i), ...
+    TEST_EQ(covSEisoDiff(hyp, x, [], i, [], false), ...
             covSEiso(hyp, x, [], i), ...
-            ['dK(x, x)/dtheta_', num2str(i)]);
+            ['K_i = dK(x, x)/dtheta_', num2str(i)]);
 end
 
-% K(x, z)
-TEST_EQ(covSEisoDiffCwise(hyp, x, z), ...
+% Ks = K(x, z)
+TEST_EQ(covSEisoDiff(hyp, x, z, 0, [], false), ...
         covSEiso(hyp, x, z), ...
-        'K(x, z)');
+        'Ks = K(x, z)');
+
+% Kss = K(z, z)
+TEST_EQ(covSEisoDiff(hyp, z, 'diag', 0, [], false), ...
+        covSEiso(hyp, z, 'diag'), ...
+        'Kss = K(z, z)');
 
 
 %% Test: covSEisoDiffBwise vs. covSEiso
 test_name = '\t[TESE: covSEisoDiffBwise vs. covSEiso]\n';
 fprintf(1, test_name);
 
-% K(x, x)
-TEST_EQ(covSEisoDiffBwise(hyp, x), ...
+% K = K(x, x)
+TEST_EQ(covSEisoDiff(hyp, x, [], 0, [], true), ...
         covSEiso(hyp, x), ...
-        'K(x, x)');
+        'K = K(x, x)');
 
-% dK(x, x)/dtheta_i
+% K_i = dK(x, x)/dtheta_i
 for i = 1:length(hyp)
-    TEST_EQ(covSEisoDiffBwise(hyp, x, [], i), ...
+    TEST_EQ(covSEisoDiff(hyp, x, [], i, [], true), ...
             covSEiso(hyp, x, [], i), ...
-            ['dK(x, x)/dtheta_', num2str(i)]);
+            ['K_i = dK(x, x)/dtheta_', num2str(i)]);
 end
 
-% K(x, z)
-TEST_EQ(covSEisoDiffBwise(hyp, x, z), ...
+% Ks = K(x, z)
+TEST_EQ(covSEisoDiff(hyp, x, z, 0, [], true), ...
         covSEiso(hyp, x, z), ...
-        'K(x, z)');
+        'Ks = K(x, z)');
+
+% Kss = K(z, z)
+TEST_EQ(covSEisoDiff(hyp, z, 'diag', 0, [], true), ...
+        covSEiso(hyp, z, 'diag'), ...
+        'Kss = K(z, z)');
 
 
 %% Test: covSEisoDiffCwise vs. covSEisoDiffBwise
 test_name = '\t[TESE: covSEisoDiffCwise vs. covSEisoDiffBwise]\n';
 fprintf(1, test_name);
 
-% K(x, x)
-TEST_EQ(covSEisoDiffCwise(hyp, x, [], 0, xd), ...
-        covSEisoDiffBwise(hyp, x, [], 0, xd), ...
-        'K(x, x)');
+% K = K(x, x)
+TEST_EQ(covSEisoDiff(hyp, x, [], 0, xd, false), ...
+        covSEisoDiff(hyp, x, [], 0, xd, true), ...
+        'K = K(x, x)');
 
-% dK(x, x)/dtheta_i    
+% K_i = dK(x, x)/dtheta_i    
 for i = 1:length(hyp)                     
-    TEST_EQ(covSEisoDiffCwise(hyp, x, [], i, xd), ...
-            covSEisoDiffBwise(hyp, x, [], i, xd), ...
-            ['dK(x, x)/dtheta_', num2str(i)]);
+    TEST_EQ(covSEisoDiff(hyp, x, [], i, xd, false), ...
+            covSEisoDiff(hyp, x, [], i, xd, true), ...
+            ['K_i = dK(x, x)/dtheta_', num2str(i)]);
 end
 
-% K(x, z)
-TEST_EQ(covSEisoDiffCwise(hyp, x, z, 0, xd), ...
-        covSEisoDiffBwise(hyp, x, z, 0, xd), ...
-        'K(x, z)');
+% Ks = K(x, z)
+TEST_EQ(covSEisoDiff(hyp, x, z, 0, xd, false), ...
+        covSEisoDiff(hyp, x, z, 0, xd, true), ...
+        'Ks = K(x, z)');
+
+% Kss = K(z, z)
+TEST_EQ(covSEisoDiff(hyp, z, 'diag', 0, [], false), ...
+        covSEisoDiff(hyp, z, 'diag', 0, [], true), ...
+        'Kss = K(z, z)');
+
     
 %% Test: covSEisoDiffBwise - symmetric
 test_name = '\t[TESE: covSEisoDiffBwise - symmetric]\n';
 fprintf(1, test_name);
 
-% K(x, x)
-K = covSEisoDiffBwise(hyp, x, [], 0, xd);
+% K = K(x, x)
+K = covSEisoDiff(hyp, x, [], 0, xd, true);
 TEST_EQ(K, ...
         K', ...
-        'K(x, x)');
+        'K = K(x, x)');
 
-% dK(x, x)/dtheta_i    
+% K_i = dK(x, x)/dtheta_i    
 for i = 1:length(hyp)
-    K = covSEisoDiffBwise(hyp, x, [], i, xd);
+    K = covSEisoDiff(hyp, x, [], i, xd, true);
     TEST_EQ(K, ...
             K', ...
-            ['dK(x, x)/dtheta_', num2str(i)]);
+            ['K_i = dK(x, x)/dtheta_', num2str(i)]);
 end
 
 %% Test: covSEisoDiffBwise - positive definite
@@ -102,20 +118,20 @@ fprintf(1, test_name);
 % sigma_n
 sigma_n = 1;
 
-% K(x, x)
-K = covSEisoDiffBwise(hyp, x, [], 0, xd);
+% K = K(x, x)
+K = covSEisoDiff(hyp, x, [], 0, xd, true);
 K = K + sigma_n^2*eye(size(K));
 [R, p] = chol(K);
 TEST_EQ(p, ...
         0', ...
-        'K(x, x)');
+        'K = K(x, x)');
 
-% dK(x, x)/dtheta_i    
+% K_i = dK(x, x)/dtheta_i    
 for i = 1:length(hyp)
-    K = covSEisoDiffBwise(hyp, x, [], i, xd);
+    K = covSEisoDiff(hyp, x, [], i, xd, true);
     K = K + sigma_n^2*eye(size(K));
     [R, p] = chol(K);
     TEST_EQ(p, ...
             0', ...
-            ['dK(x, x)/dtheta_', num2str(i)]);
+            ['K_i = dK(x, x)/dtheta_', num2str(i)]);
 end
