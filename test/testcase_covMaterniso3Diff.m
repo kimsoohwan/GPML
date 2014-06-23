@@ -8,118 +8,118 @@ n  = 5;  x  = rand(n, d);
 nd = 4;  xd = rand(nd, d);
 ns = 3;  z  = rand(ns, d);
 
-testcase_name = '[TEST_CASE: covMaternisoDiff]';
+testcase_name = '[TEST_CASE: covMaterniso3Diff]';
 disp(testcase_name);
 
 
-%% Test: covMaternisoDiffCwise vs. covMaterniso
-test_name = '\t[TESE: covMaternisoDiffCwise vs. covMaterniso]\n';
+%% Test: covMaterniso3DiffCwise vs. covMaterniso
+test_name = '\t[TESE: covMaterniso3DiffCwise vs. covMaterniso]\n';
 fprintf(1, test_name);
 
 % K = K(x, x)
-TEST_EQ(covMaternisoDiff(hyp, x, [], 0, [], false), ...
+TEST_EQ(covMaterniso3Diff(hyp, x, [], 0, [], false), ...
         covMaterniso(3, hyp, x), ...
         'K = K(x, x)');
 
 % K_i = dK(x, x)/dtheta_i
 for i = 1:length(hyp)
-    TEST_EQ(covMaternisoDiff(hyp, x, [], i, [], false), ...
+    TEST_EQ(covMaterniso3Diff(hyp, x, [], i, [], false), ...
             covMaterniso(3, hyp, x, [], i), ...
             ['K_i = dK(x, x)/dtheta_', num2str(i)]);
 end
 
 % Ks = K(x, z)
-TEST_EQ(covMaternisoDiff(hyp, x, z, 0, [], false), ...
+TEST_EQ(covMaterniso3Diff(hyp, x, z, 0, [], false), ...
         covMaterniso(3, hyp, x, z), ...
         'Ks = K(x, z)');
 
 % Kss = K(z, z)
-TEST_EQ(covMaternisoDiff(hyp, z, 'diag', 0, [], false), ...
+TEST_EQ(covMaterniso3Diff(hyp, z, 'diag', 0, [], false), ...
         covMaterniso(3, hyp, z, 'diag'), ...
         'Kss = K(z, z)');
 
 
-%% Test: covMaternisoDiffBwise vs. covMaterniso
-test_name = '\t[TESE: covMaternisoDiffBwise vs. covMaterniso]\n';
+%% Test: covMaterniso3DiffBwise vs. covMaterniso
+test_name = '\t[TESE: covMaterniso3DiffBwise vs. covMaterniso]\n';
 fprintf(1, test_name);
 
 % K = K(x, x)
-TEST_EQ(covMaternisoDiff(hyp, x, [], 0, [], true), ...
+TEST_EQ(covMaterniso3Diff(hyp, x, [], 0, [], true), ...
         covMaterniso(3, hyp, x), ...
         'K = K(x, x)');
 
 % K_i = dK(x, x)/dtheta_i
 for i = 1:length(hyp)
-    TEST_EQ(covMaternisoDiff(hyp, x, [], i, [], true), ...
+    TEST_EQ(covMaterniso3Diff(hyp, x, [], i, [], true), ...
             covMaterniso(3, hyp, x, [], i), ...
             ['K_i = dK(x, x)/dtheta_', num2str(i)]);
 end
 
 % Ks = K(x, z)
-TEST_EQ(covMaternisoDiff(hyp, x, z, 0, [], true), ...
+TEST_EQ(covMaterniso3Diff(hyp, x, z, 0, [], true), ...
         covMaterniso(3, hyp, x, z), ...
         'Ks = K(x, z)');
 
 % Kss = K(z, z)
-TEST_EQ(covMaternisoDiff(hyp, z, 'diag', 0, [], true), ...
+TEST_EQ(covMaterniso3Diff(hyp, z, 'diag', 0, [], true), ...
         covMaterniso(3, hyp, z, 'diag'), ...
         'Kss = K(z, z)');
 
 
-%% Test: covMaternisoDiffCwise vs. covMaternisoDiffBwise
-test_name = '\t[TESE: covMaternisoDiffCwise vs. covMaternisoDiffBwise]\n';
+%% Test: covMaterniso3DiffCwise vs. covMaterniso3DiffBwise
+test_name = '\t[TESE: covMaterniso3DiffCwise vs. covMaterniso3DiffBwise]\n';
 fprintf(1, test_name);
 
 % K = K(x, x)
-TEST_EQ(covMaternisoDiff(hyp, x, [], 0, xd, false), ...
-        covMaternisoDiff(hyp, x, [], 0, xd, true), ...
+TEST_EQ(covMaterniso3Diff(hyp, x, [], 0, xd, false), ...
+        covMaterniso3Diff(hyp, x, [], 0, xd, true), ...
         'K = K(x, x)');
 
 % K_i = dK(x, x)/dtheta_i    
 for i = 1:length(hyp)                     
-    TEST_EQ(covMaternisoDiff(hyp, x, [], i, xd, false), ...
-            covMaternisoDiff(hyp, x, [], i, xd, true), ...
+    TEST_EQ(covMaterniso3Diff(hyp, x, [], i, xd, false), ...
+            covMaterniso3Diff(hyp, x, [], i, xd, true), ...
             ['K_i = dK(x, x)/dtheta_', num2str(i)]);
 end
 
 % Ks = K(x, z)
-TEST_EQ(covMaternisoDiff(hyp, x, z, 0, xd, false), ...
-        covMaternisoDiff(hyp, x, z, 0, xd, true), ...
+TEST_EQ(covMaterniso3Diff(hyp, x, z, 0, xd, false), ...
+        covMaterniso3Diff(hyp, x, z, 0, xd, true), ...
         'Ks = K(x, z)');
 
 % Kss = K(z, z)
-TEST_EQ(covMaternisoDiff(hyp, z, 'diag', 0, [], false), ...
-        covMaternisoDiff(hyp, z, 'diag', 0, [], true), ...
+TEST_EQ(covMaterniso3Diff(hyp, z, 'diag', 0, [], false), ...
+        covMaterniso3Diff(hyp, z, 'diag', 0, [], true), ...
         'Kss = K(z, z)');
 
     
-%% Test: covMaternisoDiffBwise - symmetric
-test_name = '\t[TESE: covMaternisoDiffBwise - symmetric]\n';
+%% Test: covMaterniso3DiffBwise - symmetric
+test_name = '\t[TESE: covMaterniso3DiffBwise - symmetric]\n';
 fprintf(1, test_name);
 
 % K = K(x, x)
-K = covMaternisoDiff(hyp, x, [], 0, xd, true);
+K = covMaterniso3Diff(hyp, x, [], 0, xd, true);
 TEST_EQ(K, ...
         K', ...
         'K = K(x, x)');
 
 % K_i = dK(x, x)/dtheta_i    
 for i = 1:length(hyp)
-    K = covMaternisoDiff(hyp, x, [], i, xd, true);
+    K = covMaterniso3Diff(hyp, x, [], i, xd, true);
     TEST_EQ(K, ...
             K', ...
             ['K_i = dK(x, x)/dtheta_', num2str(i)]);
 end
 
-%% Test: covMaternisoDiffBwise - positive definite
-test_name = '\t[TESE: covMaternisoDiffBwise - positive definite]\n';
+%% Test: covMaterniso3DiffBwise - positive definite
+test_name = '\t[TESE: covMaterniso3DiffBwise - positive definite]\n';
 fprintf(1, test_name);
 
 % sigma_n
 sigma_n = 1;
 
 % K = K(x, x)
-K = covMaternisoDiff(hyp, x, [], 0, xd, true);
+K = covMaterniso3Diff(hyp, x, [], 0, xd, true);
 K = K + sigma_n^2*eye(size(K));
 [R, p] = chol(K);
 TEST_EQ(p, ...
@@ -128,7 +128,7 @@ TEST_EQ(p, ...
 
 % K_i = dK(x, x)/dtheta_i    
 for i = 1:length(hyp)
-    K = covMaternisoDiff(hyp, x, [], i, xd, true);
+    K = covMaterniso3Diff(hyp, x, [], i, xd, true);
     K = K + sigma_n^2*eye(size(K));
     [R, p] = chol(K);
     TEST_EQ(p, ...

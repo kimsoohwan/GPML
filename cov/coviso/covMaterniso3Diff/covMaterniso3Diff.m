@@ -1,4 +1,4 @@
-function K = covMaternisoDiff(hyp, x, z, i, xd, f_Bwise)
+function K = covMaterniso3Diff(hyp, x, z, i, xd, f_Bwise)
 
 %% function name convention
 % cov:      covariance function

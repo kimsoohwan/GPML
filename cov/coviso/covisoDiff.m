@@ -1,4 +1,4 @@
-function k = covisoDiff(f_handles, hyp, x, z, i, pdx, pdz)
+function K = covisoDiff(f_handles, hyp, x, z, i, pdx, pdz)
 
 %% function name convention
 % cov:  covariance function
@@ -8,23 +8,20 @@ function k = covisoDiff(f_handles, hyp, x, z, i, pdx, pdz)
 %% input/output arguments
 % f_handles:    component function handles
 % hyp:  [1x2]   hyperparameters, hyp = [log(ell), log(sigma_f)]
-% x:    [1xd]   first function/derivative input vector
-% z:    [1xd]   second function/derivative input vector, default: [] meaning z = x
+% x:    [nxd]   first function/derivative input vectors
+% z:    [nsxd]  second function/derivative input vectors, default: [] meaning z = x
 % i:            partial deriavtive coordiante w.r.t hyperparameters, default: 0
 % pdx:          partial derivative coordinate w.r.t the first input
 %               if dxi = 0 (default), x = function input vector, else x = derivative input
 % pdz:          partial derivative coordinate w.r.t the second input
 %               if pdz = 0 (default), z = function input vector, else z = derivative input
-% k:            covariance
+% K:            covariance
 
-%% Squared Exponential covariance function with isotropic distance measure.
+%% Covariance function with isotropic distance measure.
 %
-% It extends the original isotropic squared exponential covariance function
-% to take derivative inputs as well as function inputs.
+% The isotropic covariance function is:
 %
-% The isotropic squared exponential covariance function is:
-%
-% k(x, x') = sigma_f^2 * f(s), f(s) = exp(s), s(r) = -r^2/(2*ell^2), r = |x-x'|
+% k(x, x') = sigma_f^2 * f(s)
 %
 % (1) Partial derivatives with respective to hyperparameters
 %          
@@ -85,20 +82,20 @@ if i == 0
     if pdx == 0
         if pdz == 0
             % [0]  k(x, z)
-            k = f_handles.k(args{:});
+            K = f_handles.k(args{:});
         else
             % [2.b] k(x, dz/dz_j)
-            k = f_handles.dk_ds(args{:}) ...
+            K = f_handles.dk_ds(args{:}) ...
                 .* f_handles.ds_dzj(args{:});
         end
     else
         if pdz == 0
             % [2.a] k(dx/dx_i, z)
-            k = f_handles.dk_ds(args{:}) ...
+            K = f_handles.dk_ds(args{:}) ...
                 .* f_handles.ds_dxi(args{:});
         else
             % [2.c] k(dx/dx_j, dz/dz_j)
-            k = f_handles.d2k_ds2(args{:}) ...
+            K = f_handles.d2k_ds2(args{:}) ...
                 .* f_handles.ds_dxi(args{:}) ...
                 .* f_handles.ds_dzj(args{:}) ...
               + f_handles.dk_ds(args{:}) ...
@@ -112,11 +109,11 @@ else
         if pdx == 0
             if pdz == 0
                 % [1-a] dk(x, z)/dlog(ell)
-                k = ell * f_handles.dk_ds(args{:}) ...
+                K = ell * f_handles.dk_ds(args{:}) ...
                           .* f_handles.ds_dell(args{:});
             else
                 % [3.b] dk(x, dz/dz_j)/dlog(ell)
-                k = ell * ( f_handles.d2k_ds2(args{:}) ...
+                K = ell * ( f_handles.d2k_ds2(args{:}) ...
                             .* f_handles.ds_dell(args{:}) ...
                             .* f_handles.ds_dzj(args{:}) ...
                           + f_handles.dk_ds(args{:}) ...
@@ -125,14 +122,14 @@ else
         else
             if pdz == 0
                 % [3.a] dk(dx/dx_i, z)/dlog(ell)
-                k = ell * ( f_handles.d2k_ds2(args{:}) ...
+                K = ell * ( f_handles.d2k_ds2(args{:}) ...
                             .* f_handles.ds_dell(args{:}) ...
                             .* f_handles.ds_dxi(args{:}) ...
                           + f_handles.dk_ds(args{:}) ...
                             .* f_handles.d2s_dell_dxi(args{:}) );
             else
                 % [3.c] dk(dx/dx_j, dz/dz_j)/dlog(ell)
-                k = ell * ( f_handles.d3k_ds3(args{:}) ...
+                K = ell * ( f_handles.d3k_ds3(args{:}) ...
                             .* f_handles.ds_dell(args{:}) ...
                             .* f_handles.ds_dxi(args{:}) ...
                             .* f_handles.ds_dzj(args{:}) ...
@@ -153,6 +150,6 @@ else
         % [3.0] dk(x, dz/dz_j)/dlog(sigma_f)          = 2 * k(x, dz/dz_j)
         %       dk(dx/dx_i, z)/dlog(sigma_f)          = 2 * k(dx/dx_i, z)
         %       dk(dx/dx_j, dz/dz_j)/dlog(sigma_f)    = 2  k(dx/dx_j, dz/dz_j)
-        k = 2 * covisoDiff(f_handles, hyp, x, z, 0, pdx, pdz);
+        K = 2 * covisoDiff(f_handles, hyp, x, z, 0, pdx, pdz);
     end
 end

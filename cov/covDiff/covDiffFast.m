@@ -1,14 +1,13 @@
-function K = covisoDiffBwise(f_handles, hyp, x, xd, z, i)
+function K = covDiffFast(f_handles, hyp, x, xd, z, i)
 
 %% function name convention
 % cov:  covariance function
-% iso:  isotropic
 % Diff: differentiable w.r.t input coordinates or take derivative observations
 % Bwise: block maxtrix-wised version
 
 %% input/output arguments
 % f_handles:    function handles for component functions of derivatives
-% hyp:  [1x2]   hyperparameters, hyp = [log(ell), log(sigma_f)]
+% hyp:          hyperparameters
 % x:    [nxd]   first function input vectors
 % xd:   [ndxd]  first derivative input vectors
 % z:    [nsxd]  second function input vectors, default: [] meaning z = x
@@ -24,6 +23,7 @@ nd      = size(xd, 1);
 % prediction
 if dg
     % Kss
+    assert(i == 0);
     K = ones(n+nd, 1);
     
 % learning
@@ -34,10 +34,10 @@ else
         %                  | f(x) | df(xd)/dx_1, ..., df(xd)/dx_d
         %                  |  n   |    nd                  nd
         % -------------------------------------------------------
-        % f(x)        : n  |
-        % df(xd)/dx_1 : nd |
+        % f(x)        : n  |  FF  |  FD1,  FD2,  FD3
+        % df(xd)/dx_1 : nd |   -  | D1D1, D1D2, D1D3  
         % ...              |
-        % df(xd)/dx_d : nd |
+        % df(xd)/dx_d : nd |   -  |   - ,  ..., D3D3
         
         nn = n + nd*d;        
         K = zeros(nn, nn);
@@ -53,36 +53,47 @@ else
         for row_block = 1:num_blocks
             % derivative w.r.t x_i
             if row_block == 1
-                xx  = x;
-                pdx = 0;
                 start_row   = 1;
                 end_row     = n;
             else
-                xx  = xd;
-                pdx = row_block-1;
                 start_row   = n + nd*(row_block-2) + 1;
                 end_row     = n + nd*(row_block-1);
             end
             idx_row = start_row:end_row;
 
             % for each col: z or zd
-            for col_block = 1:num_blocks
+            for col_block = row_block:num_blocks
                 % derivative w.r.t x_i
                 if col_block == 1
-                    zz  = x;
-                    pdz = 0;
                     start_col   = 1;
                     end_col     = n;
                 else
-                    zz  = xd;
-                    pdz = col_block-1;
                     start_col   = n + nd*(col_block-2) + 1;
                     end_col     = n + nd*(col_block-1);
                 end
                 idx_col = start_col:end_col;
-
+                
                 % calculation
-                K(idx_row, idx_col) = covisoDiff(f_handles, hyp, xx, zz, i, pdx, pdz);
+                
+                % itself
+                if row_block == 1
+                    if col_block == 1
+                        % FF
+                        if i == 0,	K(idx_row, idx_col) = feval(f_handles.FF{:}, hyp, x);
+                        else        K(idx_row, idx_col) = feval(f_handles.FF{:}, hyp, x, [], i); end
+                    else
+                        % FD*
+                        K(idx_row, idx_col) = feval(f_handles.FD{:}, hyp, x, xd, col_block-1, i);                        
+                    end
+                else
+                        % D*D*
+                        K(idx_row, idx_col) = feval(f_handles.DD{:}, hyp, xd, row_block-1, xd, col_block-1, i);
+                end
+                
+                % transpose
+                if row_block ~= col_block
+                    K(idx_col, idx_row) = K(idx_row, idx_col)';
+                end
             end
         end
         
@@ -95,6 +106,8 @@ else
         % df(xd)/dx_1 |
         % ...         |
         % df(xd)/dx_d |
+        
+        assert(i == 0);
         
         nn  = n  + nd*d;        
         K = zeros(nn, ns); 
@@ -110,27 +123,27 @@ else
         for row_block = 1:num_blocks
             % derivative w.r.t x_i
             if row_block == 1
-                xx  = x;
-                pdx = 0;
                 start_row   = 1;
                 end_row     = n;
             else
-                xx  = xd;
-                pdx = row_block-1;
                 start_row   = n + nd*(row_block-2) + 1;
                 end_row     = n + nd*(row_block-1);
             end
             idx_row = start_row:end_row;
 
             % for each col: z
-            zz = z;
-            pdz = 0;
             start_col   = 1;
             end_col     = ns;
             idx_col = start_col:end_col;
             
             % calculation
-            K(idx_row, idx_col) = covisoDiff(f_handles, hyp, xx, zz, i, pdx, pdz);
+            if row_block == 1
+                % FF
+                K(idx_row, idx_col) = feval(f_handles.FF{:}, hyp, x, z);
+            else
+                % D*F
+                K(idx_row, idx_col) = feval(f_handles.FD{:}, hyp, z, xd, row_block-1, i)';
+            end
         end
     end
 end
