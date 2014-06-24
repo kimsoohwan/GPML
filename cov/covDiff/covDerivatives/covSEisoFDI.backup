@@ -1,0 +1,74 @@
+function K = covSEisoFDI(n2, hyp, x, z, ii)
+
+if nargin<2, K = '2'; return; end                  % report number of parameters
+if nargin<4, z = []; end                                   % make sure, z exists
+xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
+if nargin<5, ii = 0; end                                      % derivative index
+
+% number of data and dimensions
+[n, d] = size(x);
+n1 = n - n2;
+x1 = x(1:n1, :);
+x2 = x(n1+1:end, :);
+
+if dg
+    K = covSEiso(hyp, x, z);
+else
+    if xeqz
+        %            |F1(n1)|D1(n1)|D2(n1)|D3(n1)| F2(n2)
+        % K = ------------------------------------------
+        %     F1(n1) | F1F,   F1D1,  F1D2,  F1D3,| F1F2
+        %     D1(n1) |   -,   D1D1,  D1D2,  D1D3,| D1F2
+        %     D2(n1) |   -,      -,  D2D2,  D2D3,| D2F2
+        %     D3(n1) |   -,      -,     -,  D3D3,| D3F2
+        %     ------------------------------------------
+        %     F2(n2) |   -,      -,     -,    -, | F2F2
+        
+        K = zeros(n*(d + 1), n*(d + 1));
+        for row = 0:d
+            idx_row = n*row+1:n*(row+1);
+            for col = row:d
+                idx_col = n*col+1:n*(col+1);
+                if row == 0
+                    if col == 0
+                        % F-F
+                        if ii == 0,	K(idx_row, idx_col) = covSEiso(hyp, x);
+                        else        K(idx_row, idx_col) = covSEiso(hyp, x, [], ii); end
+                    else
+                        % F-D
+                        K(idx_row, idx_col) = covSEisoFD(hyp, x, x, col, ii);
+                    end
+                else
+                        % D-D
+                        K(idx_row, idx_col) = covSEisoDD(hyp, x, row, x, col, ii);
+                end
+
+                % transpose
+                if row ~= col
+                    K(idx_col, idx_row) = K(idx_row, idx_col)';
+                end
+            end
+        end
+    else
+        %           |F(m)|
+        % K = -----------
+        %     F(n)  | FF
+        %     D1(n) | D1F
+        %     D2(n) | D2F
+        %     D3(n) | D3F
+        
+        [m, d] = size(z);
+        K = zeros(n*(d + 1), m);
+        for row = 0:d
+            idx_row = n*row+1:n*(row+1);
+            if row == 0
+                % F-F
+                if ii == 0,	K(idx_row, :) = covSEiso(hyp, x, z);
+                else        K(idx_row, :) = covSEiso(hyp, x, z, ii); end
+            else
+                % D-F
+                K(idx_row, :) = covSEisoFD(hyp, z, x, row, ii)';
+            end
+        end
+    end
+end

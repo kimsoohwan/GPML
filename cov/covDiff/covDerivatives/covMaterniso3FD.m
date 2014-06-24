@@ -12,32 +12,23 @@ sf2  = exp(2*hyp(2));
 % precompute R = sqrt(3)*r/ell
 R = sqrt(3*sq_dist(x'/ell, z'/ell));
 
-% delta matrix: (x_j - x'_j)/ell^2
-delta_j = bsxfun(@minus, x(:, j)/ell2, (z(:, j)')/ell2);  % cross delta Kxz
+% delta matrix: (x_j - x'_j)/l^2
+K = bsxfun(@minus, x(:, j)/ell2, (z(:, j)')/ell2);  % cross delta Kxz
 
-% k = sf2 * (1 + sqrt(3)*r/ell) * exp(-sqrt(3)*r/ell)
-%   = sf2 * (1 - s) * exp(s)
-%
-% s^2 = (3/ell^2) * sum_{i=1}^d (xi - zi)^2
-% ds/dzj = -(3/ell^2)*(xj - zj)/s
-% dk/dzj = sf2 * exp(s) * (-ds/dzj + (1-s)*ds/dzj)
-%        = sf2 * exp(s) * (-s*ds/dzj)
-%        = 3*sf2 * exp(s) * (xj - zj)/ell^2
-K = (3*sf2) * delta_j .* exp(-R);
-
+K = 3*sf2*K.*exp(-R);
 switch ii
     % covariances
     case 0
-
+        %K = 3*sf2*K.*exp(-R);
+        
     % derivatives w.r.t log ell
     case 1
-        % ds/dell = (-1/ell)*s
-        % d2k/dlog(ell) dzj = ell * 3*sf2 * exp(s) * (xj-zj)/ell^2 * (-2/ell -s/ell)
-        %                   = 3*sf2 * exp(s) * (xj-zj)/ell^2 * (-s -2)
+        %K = 3*sf2*K.*(R - 2).*exp(-R);
         K = K.*(R - 2);
         
     % derivatives w.r.t log sf
     case 2
+        %K = 6*sf2*K.*exp(-R);
         K = 2*K;
         
     otherwise

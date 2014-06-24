@@ -1,13 +1,4 @@
 %% Setting
-% hyperparameters
-hyp = log([1, 1]);
-
-% data
-d = 3;
-n  = 5;  x  = rand(n, d);
-nd = 4;  xd = rand(nd, d);
-ns = 3;  z  = rand(ns, d);
-
 testcase_name = '[TEST_CASE: covSEisoDiffFast]';
 disp(testcase_name);
 
