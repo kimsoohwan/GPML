@@ -37,31 +37,31 @@ else
 end
 
 % precompute distances
-% R = sqrt((x-x')'(x-x')) / ell
-R = sqrt( sq_dist(x'/ell, z'/ell) );    % cross covariances Kxz
+% S = sqrt((x-x')'(x-x')) / ell
+S = sqrt( sq_dist(x'/ell, z'/ell) );    % cross covariances Kxz
 
 % invalid mask
-invalid_mask = R >= 1; % r >= 1
+invalid_mask = S >= 1; % r >= 1
 
 % avoiding division by 0
-mask_R0 = R < eps; 
+mask_S0 = S < eps; 
 
 % \partial k / \partial r
-pK_pR   = (2*sf2/3)*(cos(2*pi*R) - pi*sin(2*pi*R).*(1-R)-1);
-p2K_pR2 = (-2*pi*sf2/3)*(sin(2*pi*R) + 2*pi*cos(2*pi*R).*(1-R));
+pK_pS   = (2*sf2/3)*(cos(2*pi*S) - pi*sin(2*pi*S).*(1-S)-1);
+p2K_pS2 = (-2*pi*sf2/3)*(sin(2*pi*S) + 2*pi*cos(2*pi*S).*(1-S));
 
 % delta matrix: (x_j - x'_j)/(ell^2)
 delta_j = bsxfun(@minus, x(:, j)/ell2, (z(:, j)')/ell2);
 
 % K
-K = pK_pR .* (-delta_j) ./ R;
-K(mask_R0) = 0;
+K = pK_pS .* (-delta_j) ./ S;
+K(mask_S0) = 0;
 
 switch ii
     case 0  % covariances
 
     case 1  % derivatives w.r.t log ell
-        K = p2K_pR2 .* delta_j - K;
+        K = p2K_pS2 .* delta_j - K;
         
     case 2  % derivatives w.r.t log sf 
         K = 2*K;
