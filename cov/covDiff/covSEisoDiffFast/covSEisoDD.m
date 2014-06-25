@@ -27,15 +27,15 @@ factor = delta/ell2 - delta_i.*delta_j; % factor
 switch ii
     % covariances
     case 0
-        K = factor .* K;
+        K = K .* factor;
       
     % derivatives w.r.t log ell
     case 1
-        K = factor .* dK_theta_i + (-2*delta/ell2 + 4*delta_i.*delta_j) .* K;
+        K = dK_theta_i .* factor + K .* (-2*delta/ell2 + 4*delta_i.*delta_j);
       
     % derivatives w.r.t log sf
     case 2
-        K = factor .* dK_theta_i;
+        K = dK_theta_i .* factor;
         
     otherwise
         error('Unknown hyperparameter')

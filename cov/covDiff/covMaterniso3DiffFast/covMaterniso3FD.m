@@ -9,8 +9,8 @@ ell  = exp(hyp(1));                              % characteristic length scale
 ell2 = exp(2*hyp(1));
 sf2  = exp(2*hyp(2));
 
-% precompute R = sqrt(3)*r/ell
-R = sqrt(3*sq_dist(x'/ell, z'/ell));
+% precompute S = -sqrt(3)*r/ell
+S = -sqrt(3*sq_dist(x'/ell, z'/ell));
 
 % delta matrix: (x_j - x'_j)/ell^2
 delta_j = bsxfun(@minus, x(:, j)/ell2, (z(:, j)')/ell2);  % cross delta Kxz
@@ -23,7 +23,7 @@ delta_j = bsxfun(@minus, x(:, j)/ell2, (z(:, j)')/ell2);  % cross delta Kxz
 % dk/dzj = sf2 * exp(s) * (-ds/dzj + (1-s)*ds/dzj)
 %        = sf2 * exp(s) * (-s*ds/dzj)
 %        = 3*sf2 * exp(s) * (xj - zj)/ell^2
-K = (3*sf2) * delta_j .* exp(-R);
+K = (3*sf2) * exp(S) .* delta_j;
 
 switch ii
     % covariances
@@ -34,7 +34,7 @@ switch ii
         % ds/dell = (-1/ell)*s
         % d2k/dlog(ell) dzj = ell * 3*sf2 * exp(s) * (xj-zj)/ell^2 * (-2/ell -s/ell)
         %                   = 3*sf2 * exp(s) * (xj-zj)/ell^2 * (-s -2)
-        K = K.*(R - 2);
+        K = K.*(-S - 2);
         
     % derivatives w.r.t log sf
     case 2
