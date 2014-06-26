@@ -18,7 +18,7 @@ Features
     - They are used for validation of cov*Diff with ignoring divide-by-zero.
     - Do not use them for your application.
 
-  2. cov*Diff
+  2. cov*Diff.m
     - They reduce complex multiplications and additions to simpler equations.
     - They care divide-by-zero with limits. (Thus it is stable.)
     - Use them for your application.
