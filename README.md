@@ -11,7 +11,7 @@ Features
    - covSparseiso.m
    - reference : [A. Melkumyan and F. Ramos, "A Sparse Covariance Function for Exact Gaussian Process Inference in Large Datasets," Proceedings of International Joint Conferences on Artificial Intelligence, pp. 1936-1942, 2009.](http://ijcai.org/papers09/Papers/IJCAI09-320.pdf)
 
-2. Derivative observations
+2. Derivative observations (*: SEiso, Materniso3, and Sparseiso)
    1. cov*DiffUnstable.m
       - They consist of multiplications of partial derivatives.
       - They produce NaN when a partial derivative includes divide-by-zero. (Thus it is called unstable.)
