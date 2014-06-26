@@ -19,7 +19,7 @@ addpath('../cov/covDiff/covSparseisoDiff');
 
 %% setting
 % hyperparameters
-hyp = log([1, 1]);
+hyp = log([0.2, 0.5]);
 
 % data
 d = 3;

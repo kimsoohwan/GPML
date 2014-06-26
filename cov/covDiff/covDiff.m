@@ -24,7 +24,7 @@ nd      = size(xd, 1);
 if dg
     % Kss
     assert(i == 0);
-    K = ones(n+nd, 1);
+    K = exp(2*hyp(end))*ones(n+nd, 1); % sigma_f = exp(hyp(end))
     
 % learning
 else
