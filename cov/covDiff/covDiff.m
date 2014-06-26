@@ -1,106 +1,149 @@
-function K = covDiff(hyp, x, xd, z, ii, hCovFF, hCovFD, hCovDD)
+function K = covDiff(f_handles, hyp, x, xd, z, i)
 
-if nargin<4, z = []; end                                   % make sure, z exists
+%% function name convention
+% cov:  covariance function
+% Diff: differentiable w.r.t input coordinates or take derivative observations
+% Bwise: block maxtrix-wised version
+
+%% input/output arguments
+% f_handles:    function handles for component functions of derivatives
+% hyp:          hyperparameters
+% x:    [nxd]   first function input vectors
+% xd:   [ndxd]  first derivative input vectors
+% z:    [nsxd]  second function input vectors, default: [] meaning z = x
+% i:            partial deriavtive coordiante w.r.t hyperparameters, default: 0
+% K:    [nnxns]  covariance, nn = n + nd*d
+
+% some constants
 xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
-if nargin<5, ii = 0; end                                      % derivative index
+[n, d]  = size(x);
+ns      = size(z, 1);
+nd      = size(xd, 1);
 
-% number of data and dimensions
-[n, d] = size(x);
-n1 = n - n2;
-x1 = x(1:n1, :);
-x2 = x(n1+1:end, :);
-
+% prediction
 if dg
-    K = feval(hCovFF{:}, hyp, x, z);
+    % Kss
+    assert(i == 0);
+    K = ones(n+nd, 1);
+    
+% learning
 else
-    if xeqz
-        %            |F1(n1)|D1(n1)|D2(n1)|D3(n1)| F2(n2)
-        % K = ------------------------------------------
-        %     F1(n1) | F1F1,  F1D1,  F1D2,  F1D3,| F1F2
-        %     D1(n1) |    -,  D1D1,  D1D2,  D1D3,| D1F2
-        %     D2(n1) |    -,     -,  D2D2,  D2D3,| D2F2
-        %     D3(n1) |    -,     -,     -,  D3D3,| D3F2
-        %     ------------------------------------------
-        %     F2(n2) |    -,     -,     -,    -, | F2F2
+    % K
+    if xeqz  
+        % K
+        %                  | f(x) | df(xd)/dx_1, ..., df(xd)/dx_d
+        %                  |  n   |    nd                  nd
+        % -------------------------------------------------------
+        % f(x)        : n  |  FF  |  FD1,  FD2,  FD3
+        % df(xd)/dx_1 : nd |   -  | D1D1, D1D2, D1D3  
+        % ...              |
+        % df(xd)/dx_d : nd |   -  |   - ,  ..., D3D3
         
-        K = zeros(n1*(d+1)+n2, n1*(d+1)+n2);
-        for row = 0:d
-            idx_row = n1*row+1:n1*(row+1);
-            for col = row:d
-                idx_col = n1*col+1:n1*(col+1);
+        nn = n + nd*d;        
+        K = zeros(nn, nn);
+
+        % number of blocks
+        if nd > 0
+            num_blocks = 1 + d;
+        else
+            num_blocks = 1;
+        end
+        
+        % for each row block: x or xd
+        for row_block = 1:num_blocks
+            % derivative w.r.t x_i
+            if row_block == 1
+                start_row   = 1;
+                end_row     = n;
+            else
+                start_row   = n + nd*(row_block-2) + 1;
+                end_row     = n + nd*(row_block-1);
+            end
+            idx_row = start_row:end_row;
+
+            % for each col: z or zd
+            for col_block = row_block:num_blocks
+                % derivative w.r.t x_i
+                if col_block == 1
+                    start_col   = 1;
+                    end_col     = n;
+                else
+                    start_col   = n + nd*(col_block-2) + 1;
+                    end_col     = n + nd*(col_block-1);
+                end
+                idx_col = start_col:end_col;
+                
+                % calculation
                 
                 % itself
-                if row == 0
-                    if col == 0
-                        % F1F1
-                        if ii == 0,	K(idx_row, idx_col) = feval(hCovFF{:}, hyp, x1);
-                        else        K(idx_row, idx_col) = feval(hCovFF{:}, hyp, x1, [], ii); end
+                if row_block == 1
+                    if col_block == 1
+                        % FF
+                        if i == 0,	K(idx_row, idx_col) = feval(f_handles.FF{:}, hyp, x);
+                        else        K(idx_row, idx_col) = feval(f_handles.FF{:}, hyp, x, [], i); end
                     else
-                        % F1D*
-                        K(idx_row, idx_col) = feval(hCovFD{:}, hyp, x1, x1, col, ii);
+                        % FD*
+                        K(idx_row, idx_col) = feval(f_handles.FD{:}, hyp, x, xd, col_block-1, i);                        
                     end
                 else
                         % D*D*
-                        K(idx_row, idx_col) = feval(hCovDD{:}, hyp, x1, row, x1, col, ii);
+                        K(idx_row, idx_col) = feval(f_handles.DD{:}, hyp, xd, row_block-1, xd, col_block-1, i);
                 end
-
+                
                 % transpose
-                if row ~= col
+                if row_block ~= col_block
                     K(idx_col, idx_row) = K(idx_row, idx_col)';
                 end
-                
             end
-            % last column
-            idx_col = n1*(d+1)+1:n1*(d+1)+n2;
-            
-            % F1F2
-            if row == 0
-                if ii == 0,	K(idx_row, idx_col) = feval(hCovFF{:}, hyp, x1, x2);
-                else        K(idx_row, idx_col) = feval(hCovFF{:}, hyp, x1, x2, ii); end
-                
-            % D*F2
-            else
-                K(idx_row, idx_col) = feval(hCovFD{:}, hyp, x2, x1, row, ii)';
-            end
-            
-            % transpose
-            K(idx_col, idx_row) = K(idx_row, idx_col)';
         end
-        % last row and last column
-        idx_row = n1*(d+1)+1:n1*(d+1)+n2;
-        idx_col = n1*(d+1)+1:n1*(d+1)+n2;
         
-        % F2F2
-        if ii == 0,	K(idx_row, idx_col) = feval(hCovFF{:}, hyp, x2, []);
-        else        K(idx_row, idx_col) = feval(hCovFF{:}, hyp, x2, [], ii); end        
-    else
-        %            |F(m)|
-        % K = -------------
-        %     F1(n1) | F1F
-        %     D1(n1) | D1F
-        %     D2(n1) | D2F
-        %     D3(n1) | D3F
-        %     -------------
-        %     F2(n2) | F2F
+    % Ks
+    else        
+        % K
+        %             | f(z)
+        % -------------------
+        % f(x)        |
+        % df(xd)/dx_1 |
+        % ...         |
+        % df(xd)/dx_d |
         
-        [m, d] = size(z);
-        K = zeros(n1*(d+1)+n2, m);
-        for row = 0:d
-            idx_row = n1*row+1:n1*(row+1);
-            if row == 0
-                % F1F
-                if ii == 0,	K(idx_row, :) = feval(hCovFF{:}, hyp, x1, z);
-                else        K(idx_row, :) = feval(hCovFF{:}, hyp, x1, z, ii); end
+        assert(i == 0);
+        
+        nn  = n  + nd*d;        
+        K = zeros(nn, ns); 
+        
+        % number of blocks
+        if nd > 0
+            num_blocks = 1 + d;
+        else
+            num_blocks = 1;
+        end
+        
+        % for each row: x or xd
+        for row_block = 1:num_blocks
+            % derivative w.r.t x_i
+            if row_block == 1
+                start_row   = 1;
+                end_row     = n;
+            else
+                start_row   = n + nd*(row_block-2) + 1;
+                end_row     = n + nd*(row_block-1);
+            end
+            idx_row = start_row:end_row;
+
+            % for each col: z
+            start_col   = 1;
+            end_col     = ns;
+            idx_col = start_col:end_col;
+            
+            % calculation
+            if row_block == 1
+                % FF
+                K(idx_row, idx_col) = feval(f_handles.FF{:}, hyp, x, z);
             else
                 % D*F
-                K(idx_row, :) = feval(hCovFD{:}, hyp, z, x1, row, ii)';
+                K(idx_row, idx_col) = feval(f_handles.FD{:}, hyp, z, xd, row_block-1, i)';
             end
         end
-        % last row
-        idx_row = n1*(d+1)+1:n1*(d+1)+n2;
-        
-        % F2F
-        if ii == 0,	K(idx_row, :) = feval(hCovFF{:}, hyp, x2, z);
-        else        K(idx_row, :) = feval(hCovFF{:}, hyp, x2, z, ii); end
     end
 end

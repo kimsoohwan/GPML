@@ -1,10 +1,11 @@
-function K = covSEisoDiff(hyp, x, z, i, xd, f_Bwise)
+function K = covSEisoDiffUnstable(hyp, x, z, i, xd, f_Bwise)
 
 %% function name convention
 % cov:      covariance function
 % SE:       squared exponential
 % iso:      isotropic
 % Diff:     differentiable w.r.t input coordinates or take derivative observations
+% Unstable: cannot handle divide-by-zero
 
 %% input/output arguments
 % hyp:  [1x2]   hyperparameters, hyp = [log(ell), log(sigma_f)]
@@ -50,9 +51,9 @@ f_handles.d3s_dell_dxi_dzj  = @(hyp_, x_, z_, i_, pdx_, pdz_) (-2/exp(hyp_(1)))*
 
 % call
 if f_Bwise
-    K = covisoDiffBwise(f_handles, hyp, x, xd, z, i);
+    K = covisoDiffBwiseUnstable(f_handles, hyp, x, xd, z, i);
 else
-    K = covisoDiffCwise(f_handles, hyp, x, xd, z, i);
+    K = covisoDiffCwiseUnstable(f_handles, hyp, x, xd, z, i);
 end
 
 %% sub component function

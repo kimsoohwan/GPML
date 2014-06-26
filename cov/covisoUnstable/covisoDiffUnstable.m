@@ -1,9 +1,10 @@
-function K = covisoDiff(f_handles, hyp, x, z, i, pdx, pdz)
+function K = covisoDiffUnstable(f_handles, hyp, x, z, i, pdx, pdz)
 
 %% function name convention
 % cov:  covariance function
 % iso:  isotropic
 % Diff: differentiable w.r.t input coordinates or take derivative observations
+% Unstable: cannot handle divide-by-zero
 
 %% input/output arguments
 % f_handles:    component function handles
@@ -150,6 +151,6 @@ else
         % [3.0] dk(x, dz/dz_j)/dlog(sigma_f)          = 2 * k(x, dz/dz_j)
         %       dk(dx/dx_i, z)/dlog(sigma_f)          = 2 * k(dx/dx_i, z)
         %       dk(dx/dx_j, dz/dz_j)/dlog(sigma_f)    = 2  k(dx/dx_j, dz/dz_j)
-        K = 2 * covisoDiff(f_handles, hyp, x, z, 0, pdx, pdz);
+        K = 2 * covisoDiffUnstable(f_handles, hyp, x, z, 0, pdx, pdz);
     end
 end

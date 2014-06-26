@@ -1,10 +1,11 @@
-function K = covisoDiffCwise(f_handles, hyp, x, xd, z, i)
+function K = covisoDiffCwiseUnstable(f_handles, hyp, x, xd, z, i)
 
 %% function name convention
 % cov:  covariance function
 % iso:  isotropic
 % Diff: differentiable w.r.t input coordinates or take derivative observations
 % Cwise: non-vectorized or coefficient-wised version
+% Unstable: cannot handle divide-by-zero
 
 %% input/output arguments
 % hyp:  [1x2]   hyperparameters, hyp = [log(ell), log(sigma_f)]
@@ -72,7 +73,7 @@ else
                 end
 
                 % calculation
-                K(row, col) = covisoDiff(f_handles, hyp, xx, zz, i, pdx, pdz);
+                K(row, col) = covisoDiffUnstable(f_handles, hyp, xx, zz, i, pdx, pdz);
             end
         end
         
@@ -110,7 +111,7 @@ else
                 zz  = z(col, :);
 
                 % calculation
-                K(row, col) = covisoDiff(f_handles, hyp, xx, zz, i, pdx, pdz);
+                K(row, col) = covisoDiffUnstable(f_handles, hyp, xx, zz, i, pdx, pdz);
             end
         end
     end

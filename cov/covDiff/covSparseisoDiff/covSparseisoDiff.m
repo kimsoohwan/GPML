@@ -1,4 +1,4 @@
-function K = covSparseisoDiffFast(hyp, x, z, i, xd)
+function K = covSparseisoDiff(hyp, x, z, i, xd)
 
 if nargin<1, K  = '2'; return;	end     % report number of parameters
 if nargin<3, z  = [];           end     % make sure, z exists
@@ -9,4 +9,4 @@ if nargin<5, xd = [];           end  	% derivative inputs
 f_handles.FF = {@covSparseiso};
 f_handles.FD = {@covSparseisoFD};
 f_handles.DD = {@covSparseisoDD};
-K = covDiffFast(f_handles, hyp, x, xd, z, i);
+K = covDiff(f_handles, hyp, x, xd, z, i);

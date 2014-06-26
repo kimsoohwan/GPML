@@ -28,7 +28,7 @@ else
 end
 
 % precompute distances
-% R = sqrt((x-x')'(x-x')) / ell
+% R = sqrt((x-z)'(x-z)) / ell = r/ell
 if dg                                                               % vector kxx
   R = zeros(size(x,1),1);
 else

@@ -1,4 +1,4 @@
-function K = covFDI(n2, hyp, x, z, ii, hCovFF, hCovFD, hCovDD)
+function K = covDiff(hyp, x, xd, z, ii, hCovFF, hCovFD, hCovDD)
 
 if nargin<4, z = []; end                                   % make sure, z exists
 xeqz = numel(z)==0; dg = strcmp(z,'diag') && numel(z)>0;        % determine mode
