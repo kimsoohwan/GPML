@@ -1,27 +1,35 @@
-function K = covSparseisoDiffUnstable(hyp, x, z, i, xd, f_Bwise)
+function K = covSparseisoDerObsUnstable(hyp, x, z, i, f_Bwise)
 
 %% function name convention
 % cov:      covariance function
 % Sparse:   sparse
 % iso:      isotropic
-% Diff:     differentiable w.r.t input coordinates or take derivative observations
+% DerObs:     differentiable w.r.t input coordinates or take derivative observations
 % Unstable: cannot handle divide-by-zero
 
 %% input/output arguments
-% hyp:  [1x2]   hyperparameters, hyp = [log(ell), log(sigma_f)]
-% x:    [nxd]   first function input vectors
-% z:    [nsxd]  second function input vectors, default: [] meaning z = x
-% i:            partial deriavtive coordiante w.r.t hyperparameters, default: 0
-% xd:   [ndxd]  first derivative input vectors
-% f_Bwise:      true: block matrix-wised version, false: coeffient-wised version
-% K:    [nnxns]  covariance, nn = n + nd*d
+% hyp:  [1x2]       hyperparameters, hyp = [log(ell), log(sigma_f)]
+% x:    [nx(d+1)]   first function/derivative input vectors
+% z:    [nsxd]      second function input vectors, default: [] meaning z = x
+% i:                partial deriavtive coordiante w.r.t hyperparameters, default: 0
+% f_Bwise:          true: block matrix-wised version, false: coeffient-wised version
+% K:    [nnxns]     covariance, nn = n + nd*d
 
 %% default parameters
 if nargin < 2, K = '2'; return; end                  % report number of parameters
 if nargin < 3, z = [];  end                                   % make sure, z exists
 if nargin < 4, i = 0;   end
-if nargin < 5, xd = []; end
-if nargin < 6, f_Bwise = true; end
+if nargin < 5, f_Bwise = true; end
+dg = strcmp(z,'diag') && numel(z)>0;    % determine mode
+
+% x, xd
+if dg
+    xd = [];
+else
+    der_mask = x(:, 1) ~= 0;
+    xd = x( der_mask, 2:end);
+    x  = x(~der_mask, 2:end);
+end
 
 %% component functions
 
@@ -56,9 +64,9 @@ f_handles.d3s_dell_dxi_dzj  = @(hyp_, x_, z_, i_, pdx_, pdz_) (-1/exp(hyp_(1)))*
 
 % call
 if f_Bwise
-    K = covisoDiffBwiseUnstable(f_handles, hyp, x, xd, z, i);
+    K = covisoDerObsBwiseUnstable(f_handles, hyp, x, xd, z, i);
 else
-    K = covisoDiffCwiseUnstable(f_handles, hyp, x, xd, z, i);
+    K = covisoDerObsCwiseUnstable(f_handles, hyp, x, xd, z, i);
 end
 
 %% sub component function

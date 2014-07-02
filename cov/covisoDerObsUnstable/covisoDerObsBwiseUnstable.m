@@ -1,4 +1,4 @@
-function K = covisoDiffBwiseUnstable(f_handles, hyp, x, xd, z, i)
+function K = covisoDerObsBwiseUnstable(f_handles, hyp, x, xd, z, i)
 
 %% function name convention
 % cov:      covariance function
@@ -25,7 +25,8 @@ nd      = size(xd, 1);
 % prediction
 if dg
     % Kss
-    K = ones(n+nd, 1);
+    assert(i == 0);
+    K = exp(2*hyp(end))*ones(n+nd, 1); % sigma_f = exp(hyp(end))
     
 % learning
 else
@@ -83,7 +84,7 @@ else
                 idx_col = start_col:end_col;
 
                 % calculation
-                K(idx_row, idx_col) = covisoDiffUnstable(f_handles, hyp, xx, zz, i, pdx, pdz);
+                K(idx_row, idx_col) = covisoDerObsUnstable(f_handles, hyp, xx, zz, i, pdx, pdz);
             end
         end
         
@@ -96,6 +97,8 @@ else
         % df(xd)/dx_1 |
         % ...         |
         % df(xd)/dx_d |
+        
+        assert(i == 0);
         
         nn  = n  + nd*d;        
         K = zeros(nn, ns); 
@@ -131,7 +134,7 @@ else
             idx_col = start_col:end_col;
             
             % calculation
-            K(idx_row, idx_col) = covisoDiffUnstable(f_handles, hyp, xx, zz, i, pdx, pdz);
+            K(idx_row, idx_col) = covisoDerObsUnstable(f_handles, hyp, xx, zz, i, pdx, pdz);
         end
     end
 end

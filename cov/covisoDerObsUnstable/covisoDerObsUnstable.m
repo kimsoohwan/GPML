@@ -1,4 +1,4 @@
-function K = covisoDiffUnstable(f_handles, hyp, x, z, i, pdx, pdz)
+function K = covisoDerObsUnstable(f_handles, hyp, x, z, i, pdx, pdz)
 
 %% function name convention
 % cov:  covariance function
@@ -151,6 +151,6 @@ else
         % [3.0] dk(x, dz/dz_j)/dlog(sigma_f)          = 2 * k(x, dz/dz_j)
         %       dk(dx/dx_i, z)/dlog(sigma_f)          = 2 * k(dx/dx_i, z)
         %       dk(dx/dx_j, dz/dz_j)/dlog(sigma_f)    = 2  k(dx/dx_j, dz/dz_j)
-        K = 2 * covisoDiffUnstable(f_handles, hyp, x, z, 0, pdx, pdz);
+        K = 2 * covisoDerObsUnstable(f_handles, hyp, x, z, 0, pdx, pdz);
     end
 end

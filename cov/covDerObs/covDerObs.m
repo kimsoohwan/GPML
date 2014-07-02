@@ -1,8 +1,8 @@
-function K = covDiff(f_handles, hyp, x, xd, z, i)
+function K = covDerObs(f_handles, hyp, x, xd, z, i)
 
 %% function name convention
 % cov:  covariance function
-% Diff: differentiable w.r.t input coordinates or take derivative observations
+% DerObs: differentiable w.r.t input coordinates or take derivative observations
 % Bwise: block maxtrix-wised version
 
 %% input/output arguments
