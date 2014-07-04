@@ -14,10 +14,11 @@ if ~strcmp(likstr,'likGaussDerObs')         % NOTE: no explicit call to likGauss
 end
 
 % number of function and derivative training data
-nd = sum(x(:, 1) ~= 0);     % derivative training data
-n = size(x, 1) - nd;        % function derivative training data
-d = size(x, 2) - 1;         % number of dimensions
-nn = n + nd*d;
+[nn, d] = size(x);
+d = d - 1; % first column = index
+nd = sum(x(:, 1) == 1);     % derivative training data
+n  = sum(x(:, 1) == 0);     % function derivative training data
+assert(nn == n+nd*d);
 
 K = feval(cov{:}, hyp.cov, x);                      % evaluate covariance matrix
 m = feval(mean{:}, hyp.mean, x);                          % evaluate mean vector
@@ -40,7 +41,7 @@ if nargout>1                               % do we want the marginal likelihood?
     %     = (1/2) * (y-m)' * alpha           + (1/2) * log |L|*|L'|	+ (n/2) * log(2pi)
     %     = (1/2) * (y-m)' * alpha           + log |L||					+ (n/2) * log(2pi)
     %     = (1/2) * (y-m)' * alpha           + tr[log (L)]				+ (n/2) * log(2pi)
-	nlZ = (y-m)'*alpha/2 + sum(log(diag(L))) + n*log(2*pi)/2;  % -log marg lik
+	nlZ = (y-m)'*alpha/2 + sum(log(diag(L))) + nn*log(2*pi)/2;  % -log marg lik
     
     if nargout>2                                         % do we want derivatives?
         dnlZ = hyp;                                 % allocate space for derivatives

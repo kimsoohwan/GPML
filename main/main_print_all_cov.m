@@ -17,6 +17,7 @@ addpath('../cov/covDerObs/covSEisoDerObs');
 addpath('../cov/covDerObs/covMaterniso3DerObs');
 addpath('../cov/covDerObs/covSparseisoDerObs');
 
+
 %% Setting
 % hyperparameters
 ell = 0.5;
@@ -59,76 +60,32 @@ z = [
 0.089950678770581, 0.495177019089661, 0.054974146906188;
 0.560559527354885, 0.696667200555228, 0.815397211477421];
 
+xxd = [zeros(n, 1),   x;
+       1*ones(nd, 1), xd;
+       2*ones(nd, 1), xd;
+       3*ones(nd, 1), xd];
+
 % We have function and derivative observation at derivative inputs.
 % Or we have surface normal vectors at sampled hit points.
 % x = [x; xd];
 
-% print_matrix_for_reference(x, 'x');
-% print_matrix_for_reference(xd, 'xd');
-% print_matrix_for_reference(z, 'z');
+print_matrix_for_reference(x, 'x');
+print_matrix_for_reference(xd, 'xd');
+print_matrix_for_reference(z, 'z');
 
 
 %% Covariances
-% print_matrix_for_reference(sq_dist(x'),     'sqDist(x)');
-% print_matrix_for_reference(sq_dist(x', z'), 'sqDist(x, z)');
-% print_matrix_for_reference(delta(x, x, 1),  'delta(x1, x1)');
-% print_matrix_for_reference(delta(x, z, 1),  'delta(x1, z1)');
+print_matrix_for_reference(sq_dist(x'),     'sqDist(x)');
+print_matrix_for_reference(sq_dist(x', z'), 'sqDist(x, z)');
+print_matrix_for_reference(delta(x, x, 1),  'delta(x1, x1)');
+print_matrix_for_reference(delta(x, z, 1),  'delta(x1, z1)');
 
-% print_cov({@covSEiso}, 'covSEiso', hyp, x, z);
-% print_covDerObs(@covSEisoDerObs, 'covSEiso', hyp, x, xd, z);
+print_cov({@covSEiso}, 'covSEiso', hyp, x, z);
+print_covDerObs(@covSEisoDerObs, 'covSEiso', hyp, xxd, z);
 
+print_cov({@covMaterniso, 3}, 'covMaterniso3', hyp, x, z);
+print_covDerObs(@covMaterniso3DerObs, 'covMaterniso3', hyp, xxd, z);
 
-%% Gaussian Processes
-% setting
-mean_func = @meanZero;
-cov_func = {@covSEiso};
-% cov_func = {@covMaterniso, 3};
-lik_func = @likGauss;
-inf_method = @infExact;
+print_cov({@covSparseiso}, 'covSparseiso', hyp, x, z);
+print_covDerObs(@covSparseisoDerObs, 'covSparseiso', hyp, xxd, z);
 
-% hyperparameter
-hyp.cov = log([ell, sf]);
-sn = 0.1; 
-hyp.lik = log(sn);
-
-% y  = scale*rand(n, 1);
-y = [
-0.729513045504647;
-0.224277070664514;
-0.269054731773365;
-0.673031165004119;
-0.477492197726861];
-   
-% nn = n + nd*d;
-% y  = scale*rand(nn, 1);
-% y = [
-% 0.346448761300360;
-% 0.886543861760306;
-% 0.454694864991908;
-% 0.413427289020815;
-% 0.217732068357300;
-% 0.125654587362626;
-% 0.308914593566815;
-% 0.726104431664832;
-% 0.782872072979123;
-% 0.693787614986897;
-% 0.009802252263062;
-% 0.843213338010510;
-% 0.922331997796276;
-% 0.770954220673925;
-% 0.042659855935049;
-% 0.378186137050219;
-% 0.704339624483368];
-
-print_matrix_for_reference(y, 'y');
-
-% training
-[nlZ, dnlZ] = gp(hyp, inf_method, mean_func, cov_func, lik_func, x, y)
-
-% prediction - regression
-[dummy, dummy, fmu, fs2] = gp(hyp, inf_method, mean_func, cov_func, lik_func, x, y, z);
-print_matrix_for_reference(fmu, 'fmu');
-print_matrix_for_reference(fs2, 'fs2');
-
-% prediction - classification
-%[dummy, dummy, fmu, fs2, lp] = gp(hyp, inf_func, mean_func, cov_func, lik_func, x, y, xs, ys);

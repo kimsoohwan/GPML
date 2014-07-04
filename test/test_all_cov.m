@@ -52,8 +52,10 @@ z    = [0.3424    0.5449    0.0548
 % z  = scale*rand(ns-2, d);    z   = [z;   x(end, :);  xd(end, :)];  	% duplication
 
 xx  = [zeros(n, 1), x];
-xxd = [zeros(n, 1), x
-       ones(nd, 1), xd];
+xxd = [zeros(n, 1),   x;
+       1*ones(nd, 1), xd;
+       2*ones(nd, 1), xd;
+       3*ones(nd, 1), xd];
     
 % sigma_n
 % sigma_n = 0;
@@ -61,13 +63,13 @@ sigma_n = 0.0000001;
 
 
 %% test cases
-% testcase_cov({@covSEiso},        'covSEiso',      hyp, x, sigma_n);
-% testcase_cov({@covMaterniso, 3}, 'covMaterniso3', hyp, x, sigma_n);
-% testcase_cov({@covSparseiso},    'covSparseiso',  hyp, x, sigma_n);
+testcase_cov({@covSEiso},        'covSEiso',      hyp, x, sigma_n);
+testcase_cov({@covMaterniso, 3}, 'covMaterniso3', hyp, x, sigma_n);
+testcase_cov({@covSparseiso},    'covSparseiso',  hyp, x, sigma_n);
 
-% testcase_covisoDerObsUnstable(@covSEisoDerObsUnstable,      {@covSEiso},        'covSEiso',      hyp, x, z, xx, xxd, sigma_n);
-% testcase_covisoDerObsUnstable(@covMaterniso3DerObsUnstable, {@covMaterniso, 3}, 'covMaterniso3', hyp, x, z, xx, xxd, sigma_n);
-% testcase_covisoDerObsUnstable(@covSparseisoDerObsUnstable,  {@covSparseiso},    'covSparseiso',  hyp, x, z, xx, xxd, sigma_n);
+testcase_covisoDerObsUnstable(@covSEisoDerObsUnstable,      {@covSEiso},        'covSEiso',      hyp, x, z, xx, xxd, sigma_n);
+testcase_covisoDerObsUnstable(@covMaterniso3DerObsUnstable, {@covMaterniso, 3}, 'covMaterniso3', hyp, x, z, xx, xxd, sigma_n);
+testcase_covisoDerObsUnstable(@covSparseisoDerObsUnstable,  {@covSparseiso},    'covSparseiso',  hyp, x, z, xx, xxd, sigma_n);
 
 testcase_covDerObs(@covSEisoDerObs,      @covSEisoDerObsUnstable,      {@covSEiso},        'covSEiso',      hyp, x, z, xx, xxd, sigma_n);
 testcase_covDerObs(@covMaterniso3DerObs, @covMaterniso3DerObsUnstable, {@covMaterniso, 3}, 'covMaterniso3', hyp, x, z, xx, xxd, sigma_n);

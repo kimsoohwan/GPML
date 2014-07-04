@@ -7,10 +7,8 @@ function A = meanZeroDerObs(hyp, x, i)
 if nargin<2, A = '0'; return; end             % report number of hyperparameters 
 
 % number of function and derivative training data
-nd = sum(x(:, 1) ~= 0);     % derivative training data
-n = size(x, 1) - nd;        % function derivative training data
-d = size(x, 2) - 1;         % number of dimensions
-nn = n + nd*d;
+[nn, d] = size(x);
+d = d - 1; % first column = index
 
 % value
 A = zeros(nn, 1);           % derivative and mean
