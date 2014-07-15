@@ -8,7 +8,8 @@ function [post nlZ dnlZ] = infExactDerObs(hyp, mean, cov, lik, x, y)
 %
 % See also INFMETHODS.M.
 
-likstr = lik; if ~ischar(lik), likstr = func2str(lik); end 
+if iscell(lik), likstr = lik{1}; else likstr = lik; end
+if ~ischar(likstr), likstr = func2str(likstr); end 
 if ~strcmp(likstr,'likGaussDerObs')         % NOTE: no explicit call to likGauss
   error('Exact inference only possible with Gaussian likelihood dealing with derivative observations');
 end
