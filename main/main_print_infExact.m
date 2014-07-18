@@ -111,6 +111,9 @@ sn = 0.1;
 hyp.lik = log(sn);
 
 % prediction - regression
+% gp.m
+% print_matrix_for_reference(post.sW, 'D');
+
 [dummy, dummy, fmu, fs2] = gp(hyp, inf_method, mean_func, cov_func, lik_func, x, y, z);
 print_matrix_for_reference(fmu, 'fmu');
 print_matrix_for_reference(fs2, 'fs2');
