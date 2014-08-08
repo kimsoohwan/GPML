@@ -9,14 +9,20 @@ col_index = 0;
 for row = 1:size(K, 1)
     for col = 1:size(K, 2)
         if K(row, col) >= 0
-            fprintf(' %.15ff, ', K(row, col));
+            fprintf(' %.15ff', K(row, col));
         else
-            fprintf('%.15ff, ', K(row, col));
+            fprintf('%.15ff', K(row, col));
         end
         col_index = col_index + 1;
         if col_index == num_col
-            fprintf('\n');
-            col_index = 0;
+            if row ~= size(K, 1)
+                fprintf(',\n');
+                col_index = 0;
+            else
+                fprintf(';\n')
+            end
+        else
+            fprintf(', ');
         end
     end
     %fprintf('\n');
