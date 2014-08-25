@@ -46,10 +46,10 @@ switch ii
     case 0  % covariances
         K = sf2*((2+cos(2*pi*R)).*(1-R)/3 + sin(2*pi*R)/(2*pi));
     case 1  % derivatives w.r.t log ell
-        pK_pR = (2*sf2/3)*(cos(2*pi*R) - pi*sin(2*pi*R).*(1-R)-1);
-        pR_pL = -R/ell;
-        K = ell*pK_pR.*pR_pL;
-        %K = -(2*sf2/3)*(cos(2*pi*R) - pi*sin(2*pi*R).*(1-R)-1).*R;
+%         pK_pR = (2*sf2/3)*(cos(2*pi*R) - pi*sin(2*pi*R).*(1-R)-1);
+%         pR_pL = -R/ell;
+%         K = ell*pK_pR.*pR_pL;
+        K = -(2*sf2/3)*(cos(2*pi*R) - pi*sin(2*pi*R).*(1-R)-1).*R;
     case 2  % derivatives w.r.t log sf 
         K = 2*sf2*((2+cos(2*pi*R)).*(1-R)/3 + sin(2*pi*R)/(2*pi));
     otherwise

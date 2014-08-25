@@ -89,3 +89,7 @@ print_covDerObs(@covMaterniso3DerObs, 'covMaterniso3', hyp, xxd, z);
 print_cov({@covSparseiso}, 'covSparseiso', hyp, x, z);
 print_covDerObs(@covSparseisoDerObs, 'covSparseiso', hyp, xxd, z);
 
+hyp = [hyp, hyp];
+print_cov({@covProd,{@covSEiso, {@covMaterniso, 3}}}, 'covSEiso * covMaterniso', hyp, x, z);
+% print_covDerObs(@covSEisoDerObs, 'covSEiso', hyp, xxd, z);
+
